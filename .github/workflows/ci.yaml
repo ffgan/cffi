@@ -27,37 +27,37 @@ env:
   skip_artifact_upload: ${{ (github.event_name == 'workflow_dispatch' && inputs.skip_artifact_upload) || github.event_name != 'workflow_dispatch' }}
 
 jobs:
-  # python_sdist:
-  #   runs-on: ubuntu-24.04
-  #   outputs:
-  #     sdist_artifact_name: ${{ steps.build_sdist.outputs.sdist_artifact_name }}
-  #     package_version: ${{ steps.build_sdist.outputs.package_version }}
-  #   steps:
-  #   - name: clone repo
-  #     uses: actions/checkout@v4
+  python_sdist:
+    runs-on: ubuntu-24.04
+    outputs:
+      sdist_artifact_name: ${{ steps.build_sdist.outputs.sdist_artifact_name }}
+      package_version: ${{ steps.build_sdist.outputs.package_version }}
+    steps:
+    - name: clone repo
+      uses: actions/checkout@v4
 
-  #   - name: install python
-  #     uses: actions/setup-python@v5
-  #     with:
-  #       python-version: 3.x
+    - name: install python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.x
 
-  #   - name: build sdist
-  #     id: build_sdist
-  #     run: |
-  #       rm -rf dist/
-  #       python -m pip install build
-  #       python -m build --sdist
+    - name: build sdist
+      id: build_sdist
+      run: |
+        rm -rf dist/
+        python -m pip install build
+        python -m build --sdist
         
-  #       echo "sdist_artifact_name=$(ls ./dist)" >> "$GITHUB_OUTPUT"
-  #       echo "package_version=$(ls ./dist | sed -En 's/cffi-(.+)\.tar\.gz/\1/p')" >> "$GITHUB_OUTPUT"
+        echo "sdist_artifact_name=$(ls ./dist)" >> "$GITHUB_OUTPUT"
+        echo "package_version=$(ls ./dist | sed -En 's/cffi-(.+)\.tar\.gz/\1/p')" >> "$GITHUB_OUTPUT"
 
-  #   - name: upload sdist artifact
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: ${{ steps.build_sdist.outputs.sdist_artifact_name }}
-  #       path: dist/${{ steps.build_sdist.outputs.sdist_artifact_name }}
-  #       if-no-files-found: error
-  #     # always upload the sdist artifact- all the wheel build jobs require it
+    - name: upload sdist artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.build_sdist.outputs.sdist_artifact_name }}
+        path: dist/${{ steps.build_sdist.outputs.sdist_artifact_name }}
+        if-no-files-found: error
+      # always upload the sdist artifact- all the wheel build jobs require it
 
   make_linux_matrix:
     runs-on: ubuntu-24.04
@@ -148,7 +148,7 @@ jobs:
           - { spec: cp313-manylinux_riscv64, arch: riscv64, omit: ${{ env.skip_slow_jobs  || env.skip_ci_redundant_jobs}}}
 
   linux:
-    needs: [make_linux_matrix]
+    needs: [python_sdist, make_linux_matrix]
     runs-on: ${{ (matrix.arch == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
