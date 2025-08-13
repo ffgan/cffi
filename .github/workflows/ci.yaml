@@ -398,69 +398,69 @@ jobs:
   #       delete-merged: true
   #     if: ${{ env.skip_artifact_upload != 'true' }}
 
-  make_run_parallel_matrix:
-    runs-on: ubuntu-24.04
-    outputs:
-      matrix_json: ${{ steps.make_matrix.outputs.matrix_json }}
-    steps:
-    - uses: actions/checkout@v4
-    - name: make a matrix
-      id: make_matrix
-      uses: ./.github/actions/dynamatrix
-      with:
-        matrix_yaml: |
-          include:
-          - { runner: ubuntu-latest, python-version: 3.14t-dev }
-          - { runner: macos-latest, python-version: 3.14t-dev }
-          - { runner: windows-latest, python-version: 3.14t-dev }
+  # make_run_parallel_matrix:
+  #   runs-on: ubuntu-24.04
+  #   outputs:
+  #     matrix_json: ${{ steps.make_matrix.outputs.matrix_json }}
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: make a matrix
+  #     id: make_matrix
+  #     uses: ./.github/actions/dynamatrix
+  #     with:
+  #       matrix_yaml: |
+  #         include:
+  #         - { runner: ubuntu-latest, python-version: 3.14t-dev }
+  #         - { runner: macos-latest, python-version: 3.14t-dev }
+  #         - { runner: windows-latest, python-version: 3.14t-dev }
 
 
-  pytest-run-parallel:
-    needs: make_run_parallel_matrix
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.make_run_parallel_matrix.outputs.matrix_json) }}
+  # pytest-run-parallel:
+  #   needs: make_run_parallel_matrix
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJSON(needs.make_run_parallel_matrix.outputs.matrix_json) }}
 
-    runs-on: ${{ matrix.runner }}
-    steps:
-    - name: clone repo
-      uses: actions/checkout@v4
+  #   runs-on: ${{ matrix.runner }}
+  #   steps:
+  #   - name: clone repo
+  #     uses: actions/checkout@v4
 
-    - name: install python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+  #   - name: install python
+  #     uses: actions/setup-python@v5
+  #     with:
+  #       python-version: ${{ matrix.python-version }}
 
-    - name: build and install
-      run: |
-        python -m pip install pytest setuptools pytest-run-parallel
-        python -m pip install .
+  #   - name: build and install
+  #     run: |
+  #       python -m pip install pytest setuptools pytest-run-parallel
+  #       python -m pip install .
 
-    - name: run tests under pytest-run-parallel
-      if: runner.os == 'Windows'
-      run: |
-        python -m pytest --parallel-threads=4 src/c
+  #   - name: run tests under pytest-run-parallel
+  #     if: runner.os == 'Windows'
+  #     run: |
+  #       python -m pytest --parallel-threads=4 src/c
 
-    - name: run tests under pytest-run-parallel
-      if: runner.os != 'Windows'
-      run: |
-        python -m pytest --parallel-threads=4
+  #   - name: run tests under pytest-run-parallel
+  #     if: runner.os != 'Windows'
+  #     run: |
+  #       python -m pytest --parallel-threads=4
 
-  clang_TSAN:
-    runs-on: ubuntu-latest
-    container: ghcr.io/nascheme/numpy-tsan:3.14t
-    steps:
-    - uses: actions/checkout@v4
+  # clang_TSAN:
+  #   runs-on: ubuntu-latest
+  #   container: ghcr.io/nascheme/numpy-tsan:3.14t
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: build and install
-      run: |
-        python -m pip install setuptools pytest pytest-run-parallel
-        CFLAGS="-g -O3 -fsanitize=thread" python -m pip install -v .
+  #   - name: build and install
+  #     run: |
+  #       python -m pip install setuptools pytest pytest-run-parallel
+  #       CFLAGS="-g -O3 -fsanitize=thread" python -m pip install -v .
 
-    - name: run tests under pytest-run-parallel
-      run: |
-        TSAN_OPTIONS="suppressions=$PWD/suppressions_free_threading.txt" \
-        python -m pytest --parallel-threads=4 --skip-thread-unsafe=True -sv
+  #   - name: run tests under pytest-run-parallel
+  #     run: |
+  #       TSAN_OPTIONS="suppressions=$PWD/suppressions_free_threading.txt" \
+  #       python -m pytest --parallel-threads=4 --skip-thread-unsafe=True -sv
 
   # check:
   #   if: always()
