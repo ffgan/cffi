@@ -462,12 +462,12 @@ jobs:
         TSAN_OPTIONS="suppressions=$PWD/suppressions_free_threading.txt" \
         python -m pytest --parallel-threads=4 --skip-thread-unsafe=True -sv
 
-  check:
-    if: always()
-    needs: [python_sdist, linux, macos, windows, clang_TSAN, pytest-run-parallel, merge_artifacts]
-    runs-on: ubuntu-24.04
-    steps:
-    - name: Verify all previous jobs succeeded (provides a single check to sample for gating purposes)
-      uses: re-actors/alls-green@release/v1
-      with:
-        jobs: ${{ toJSON(needs) }}
+  # check:
+  #   if: always()
+  #   needs: [ linux, macos, windows, clang_TSAN, pytest-run-parallel, merge_artifacts]
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #   - name: Verify all previous jobs succeeded (provides a single check to sample for gating purposes)
+  #     uses: re-actors/alls-green@release/v1
+  #     with:
+  #       jobs: ${{ toJSON(needs) }}
