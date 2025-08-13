@@ -387,16 +387,16 @@ jobs:
     #     if-no-files-found: error
     #   if: ${{ env.skip_artifact_upload != 'true' }}
 
-  merge_artifacts:
-    needs: [python_sdist, linux, macos, windows]
-    runs-on: ubuntu-24.04
-    steps:
-    - name: merge all artifacts
-      uses: actions/upload-artifact/merge@v4
-      with:
-        name: dist-cffi-${{ needs.python_sdist.outputs.package_version }}
-        delete-merged: true
-      if: ${{ env.skip_artifact_upload != 'true' }}
+  # merge_artifacts:
+  #   needs: [linux, macos, windows]
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #   - name: merge all artifacts
+  #     uses: actions/upload-artifact/merge@v4
+  #     with:
+  #       name: dist-cffi-${{ needs.python_sdist.outputs.package_version }}
+  #       delete-merged: true
+  #     if: ${{ env.skip_artifact_upload != 'true' }}
 
   make_run_parallel_matrix:
     runs-on: ubuntu-24.04
